@@ -1,0 +1,131 @@
+#!/bin/bash
+  
+# Please specify the ros workspaces here!
+source /opt/ros/indigo/setup.bash
+source ~/catkin_ws/devel/setup.bash
+
+# Save current path
+initialPath=$(pwd)
+
+# Make aliases available
+shopt -s expand_aliases
+
+# Alias for executing clang in the current directory
+alias exec_clang='find . -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs rosrun ipa_code_refactoring clang-format -i -style=file'
+# Alias for executing autopep in the current directory
+# TODO: Add autopep call
+alias exec_autopep='find . -name "*.py" | xargs '
+
+
+# Get input
+echo
+echo "1)  Do you want to 
+      [a] Format all files within the 'src' Folder 
+      [b] Format all files in certain ROS packages
+      [c] Format all files within a repository"
+read -p "Option:  " resp_formatType
+echo 
+
+case $resp_formatType in
+    [aA]) 
+        # Format src folder
+        currentFolder=${PWD##*/}
+
+        # Get src folder
+        echo "2)  Please enter the path to your 'src' folder:"
+        read -e -p "Path:  " resp_srcFolder
+
+        cd "$resp_srcFolder"
+
+        case "$1" in
+          "cpp") 
+                exec_clang
+                ;;
+          "py")  
+                echo "Python functionality currently not implemented."
+                ;;
+        esac        
+        echo "Formatted all files in:  '$(pwd)'"
+        ;;
+    [bB]) 
+        # Format ros packages
+
+        # Get packages
+        echo "2)  Specify the ROS packages you want to format (quit by entering [q/Q]):"
+        read -e -p "ROS Package:  " resp_rosPkg
+
+        while [ "$resp_rosPkg" != "q" -a "$resp_rosPkg" != "Q" ]
+        do
+          # Switch directory to Package
+          roscd "$resp_rosPkg" > /dev/null
+          
+          # Check if package was found 
+          if [ "$?" -eq 1 ]
+          then
+            echo "Can't find ROS package called '$resp_rosPkg'. Try another one:"
+          else
+            case "$1" in
+              "cpp")
+                    exec_clang
+                    ;;
+              "py") 
+                    echo "Python functionality currently not implemented."
+                    ;;
+            esac
+            echo -e "Formatted all files in:  '$(pwd)'\n"
+          fi
+
+          # Read next package
+          read -e -p "ROS Package:  " resp_rosPkg
+        done
+        ;;
+    [cC])
+        # Format repositories
+
+        # Get src folder
+        echo "2)  Please enter the path to your 'src' folder:"
+        read -e -p "Path:  " resp_srcFolder
+
+        cd "$resp_srcFolder"
+        echo
+
+        # Get packages
+        echo "3)  Specify the repositories you want to format (quit by entering [q/Q]):"
+        read -e -p "Repository:  " resp_repo
+
+        while [ "$resp_repo" != "q" -a "$resp_repo" != "Q" ]
+        do
+          # Switch directory to Package
+          cd "$resp_repo" >/dev/null
+          
+          # Check if package was found 
+          if [ "$?" -eq 1 ]
+          then
+            echo "Can't find repository called '$resp_repo'. Try another one:"
+          else
+            case "$1" in
+              "cpp") 
+                    exec_clang
+                    ;;
+              "py") 
+                    echo "Python functionality currently not implemented."
+                    # exec_autopep
+                    ;;
+            esac
+            echo -e "Formatted all files in:  '$(pwd)'\n"
+          fi
+
+          # Read next package
+          read -e -p "Repository:  " resp_repo
+        done
+
+        ;;
+    *)
+        echo "Error! Wrong character, program is shutting down now."
+        ;;
+esac
+
+echo "Exiting the application."
+
+# Go back to initial path
+cd "$initialPath"
