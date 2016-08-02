@@ -7,6 +7,9 @@ import sys
 import os.path
 import os
 import subprocess
+import rospkg
+import fnmatch
+import yaml
 
 
 def print_params(input_list):
@@ -175,9 +178,67 @@ def convert_values_cfg(in_values, line_end):
     line_end = ", "+in_values[3]+", "+in_values[4]
   return line_end
 
+def find_file(in_root_path, in_file_name):
+  matches = []
+  for root, dirnames, filenames in os.walk(in_root_path):
+      for filename in fnmatch.filter(filenames, in_file_name):
+          matches.append(os.path.join(root, filename))
+  if len(matches) == 1:
+    return matches[0]
+  else:
+    print "Can't find file with type '"+in_file_name+"'"
+    return ''
+
+
+
+
+
 #####  Ordering of values: [name, type, value, range_lower, range_upper]  #####
 
-# check if additional filenam was provided,
+## Constants:
+# specify static id's for file types
+FILE_COMMON = 0
+FILE_ROS = 1
+FILE_CFG = 2
+FILE_YAML = 3
+
+# own package name
+THIS_PKG_NAME = 'ipa_code_refactoring'
+
+## Important global variables
+rospack = rospkg.RosPack()
+
+## Load config file data
+# check for code refactoring pkg
+try:
+  this_cfg_path = rospack.get_path(THIS_PKG_NAME)+'/cfg/param_update.yaml'
+except Exception, e:
+  print "Can't find ROS Package with name '"+THIS_PKG_NAME+"'"
+  sys.exit()
+
+# read config-yaml file
+this_cfg = {}
+print this_cfg_path
+if os.path.exists(this_cfg_path):
+  with open(this_cfg_path, 'r') as stream:
+    try:
+      this_cfg = yaml.load(stream)  
+    except Exception as e:
+      print(e)
+else:
+  print "Can't find CFG file with name '"+this_cfg_path+''+"' in package '"+THIS_PKG_NAME+"'"
+
+# File types
+file_types = [this_cfg.get('file_common', '_common.cpp'),
+              this_cfg.get('file_ros', '_ros.cpp'),
+              this_cfg.get('file_cfg', '.cfg'),
+              this_cfg.get('file_yaml', '.yaml')]
+
+# Path to yaml folder
+cfg_yaml_path = this_cfg.get('path_yaml_folder', 
+                    '/home/srd-rd/catkin_ws/src/ipa_navigation/ipa_navigation_config/config/components')
+
+# check if additional filename was provided,
 # otherwise take the package name as filename
 if len(sys.argv) <= 1:
   print 'You need to provide at least a package name. Program shutting down now.'
@@ -194,21 +255,28 @@ new_names = []
 zip_names = zip(old_names, new_names)
 
 
+# find path to ros package
+try:
+  pkg_path = rospack.get_path(pkg_name)
+except Exception, e:
+  print "Can't find ROS Package with name '"+pkg_name+"'"
+  sys.exit()
+
+# find cpp, cfg and yaml files in pkg_path
+file_paths = ['','','','']
+
+file_paths[FILE_COMMON] = find_file(pkg_path, file_name+file_types[FILE_COMMON])
+if len(file_paths[FILE_COMMON]) <= 0:
+  file_paths[FILE_COMMON] = find_file(pkg_path, file_name+'.cpp')
+
+file_paths[FILE_ROS] = find_file(pkg_path, file_name+file_types[FILE_ROS])
+file_paths[FILE_CFG] = find_file(pkg_path, file_name+file_types[FILE_CFG])
+file_paths[FILE_YAML] = find_file(cfg_yaml_path, file_name+file_types[FILE_YAML]).replace('_node', '')
+
 # list of methods for updating parameter values
 update_params = [update_params_ros, update_params_cfg]
 # list of methods for constructing lines for missing parameters
 extract_values = [extract_values_common, extract_values_ros, extract_values_cfg, extract_values_yaml]
-
-
-# define file paths and types
-path_common = '/home/srd-rd/catkin_ws/src/ipa_navigation_localization/'+pkg_name+'/common/src/'+file_name+'_common.cpp'
-path_ros = '/home/srd-rd/catkin_ws/src/ipa_navigation_localization/'+pkg_name+'/ros/src/'+file_name+'_ros.cpp'
-path_cfg = '/home/srd-rd/catkin_ws/src/ipa_navigation_localization/'+pkg_name+'/cfg/'+file_name+'.cfg'
-path_yaml = '/home/srd-rd/catkin_ws/src/ipa_navigation/ipa_navigation_config/config/components/'+file_name+'.yaml'
-path_yaml = path_yaml.replace('_node', '')
-
-file_paths = [path_common, path_ros, path_cfg, path_yaml] 
-file_types = ['_common.cpp', '_ros.cpp', '.cfg', '.yaml']
 
 
 ### Regular Expressions ###
@@ -239,17 +307,14 @@ regex_values_cfg = re.compile(r'gen.add\("([a-z_A-Z0-9]+)", ?([a-z]+)_t, ?[0-9],
 # regex for finding param values in yaml file
 regex_values_yaml = re.compile(r'^([a-z_A-Z0-9]+): ?()([0-9.]+|[a-zA-Z]+|"[^"\']*")')
 
-regex_update_params_ros = re.compile(r'')
-regex_update_params_cfg = re.compile(r'')
-
 regex_values = [regex_values_common, regex_values_ros, regex_values_cfg, regex_values_yaml]
 regex_params = [regex_params_common_snake, regex_params_ros, regex_params_cfg, regex_params_yaml]
 
 
 ### Extract parameters out of common - this serves as initial start point
 print
-if os.path.exists(path_common):
-  with open(path_common, 'r+') as f:
+if os.path.exists(file_paths[FILE_COMMON]):
+  with open(file_paths[FILE_COMMON], 'r+') as f:
 
     config_reached = False
 
@@ -298,14 +363,14 @@ if os.path.exists(path_common):
 
     print "Extracted "+str(len(old_names))+" parameters out of \'../"+file_name+"_common.cpp\' \n\n"
 else:
-  print "\nError: File \'"+path_common+"\' does not exist."
+  print "\nError: File \'"+file_paths[FILE_COMMON]+"\' does not exist."
   sys.exit()
 
 
 
 ### Check if Parameters were found
 if len(old_names) < 1 and len(new_names) < 1:
-  print "\nError: No parameters found in file \'"+path_common+"\'"
+  print "\nError: No parameters found in file \'"+file_paths[FILE_COMMON]+"\'"
   sys.exit()
 
 
@@ -556,7 +621,7 @@ if found_missing_params:
 ### Open files in sublime
 user_input = raw_input('\nOpen changed files in sublime? [y/n]  ')
 if user_input == 'y' or user_input == 'Y':
-  os.system('subl '+path_common+' '+path_ros+' '+path_cfg+' '+path_yaml)
+  os.system('subl '+file_paths[FILE_COMMON]+' '+file_paths[FILE_ROS]+' '+file_paths[FILE_CFG]+' '+file_paths[FILE_YAML])
 
 
 

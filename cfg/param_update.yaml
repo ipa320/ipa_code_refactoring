@@ -1,0 +1,11 @@
+# File types
+file_common: "_common.cpp"
+file_ros: "_ros.cpp"
+file_cfg: ".cfg"
+file_yaml: ".yaml"
+
+# Path to yaml folder
+path_yaml_folder: "/home/srd-rd/catkin_ws/src/ipa_navigation/ipa_navigation_config/config/components"
+
+# Test
+test: "Das ist ein Test!"
