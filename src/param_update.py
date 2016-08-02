@@ -227,7 +227,7 @@ rospack = rospkg.RosPack()
 # check for code refactoring pkg
 try:
     this_cfg_path = rospack.get_path(THIS_PKG_NAME) + '/cfg/param_update.yaml'
-except Exception as e:
+except Exception, e:
     print "Can't find ROS Package with name '" + THIS_PKG_NAME + "'"
     sys.exit()
 
@@ -275,7 +275,7 @@ zip_names = zip(old_names, new_names)
 # find path to ros package
 try:
     pkg_path = rospack.get_path(pkg_name)
-except Exception as e:
+except Exception, e:
     print "Can't find ROS Package with name '" + pkg_name + "'"
     sys.exit()
 
@@ -581,7 +581,6 @@ for current_file_id, current_file in enumerate(file_paths[1:3]):
 
 
 # Get missing parameter lines for adding
-
 if found_missing_params:
     print "\n[1]        Print lines of all missing values on screen"
     print "[2]        Save lines of all missing values to file ('" + file_name + ".missing')"
@@ -629,13 +628,5 @@ if found_missing_params:
 # Open files in sublime
 user_input = raw_input('\nOpen changed files in sublime? [y/n]  ')
 if user_input == 'y' or user_input == 'Y':
-    os.system(
-        editor +
-        ' ' +
-        file_paths[FILE_COMMON] +
-        ' ' +
-        file_paths[FILE_ROS] +
-        ' ' +
-        file_paths[FILE_CFG] +
-        ' ' +
-        file_paths[FILE_YAML])
+    os.system(editor + ' ' + file_paths[FILE_COMMON] + ' ' + file_paths[FILE_ROS] +
+              ' ' + file_paths[FILE_CFG] + ' ' + file_paths[FILE_YAML])
