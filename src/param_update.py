@@ -288,14 +288,13 @@ else:
     file_name = input_ros_pkg
 
 
-
-
 # find cpp, cfg and yaml files in pkg_path
 file_paths = ['', '', '', '']
 
 file_paths[FILE_COMMON] = find_file(pkg_path, file_name + file_types[FILE_COMMON])
 if len(file_paths[FILE_COMMON]) <= 0:
     file_paths[FILE_COMMON] = find_file(pkg_path, file_name + '.cpp')
+    file_types[FILE_COMMON] = '.cpp'
 
 file_paths[FILE_ROS] = find_file(pkg_path, file_name + file_types[FILE_ROS])
 file_paths[FILE_CFG] = find_file(pkg_path, file_name + file_types[FILE_CFG])
@@ -515,9 +514,7 @@ for current_file_id, current_file in enumerate(file_paths[1:3]):
 list_a_id = 0
 missing_params = [Set([]), Set([]), Set([]), Set([])]
 
-for list_a in found_params_all[:2]:
-    if len(list_a) <= 0:
-        continue
+for list_a_id, list_a in enumerate(found_params_all[:2]):
     list_b_id = list_a_id + 1
 
     for list_b in found_params_all[list_b_id:]:
@@ -529,7 +526,6 @@ for list_a in found_params_all[:2]:
         missing_params[list_a_id].update(diff_b)
 
         list_b_id += 1
-    list_a_id += 1
 
 
 # Print missing parameters
@@ -538,7 +534,7 @@ for i, missing_param_list in enumerate(missing_params):
     if len(missing_param_list) > 0:
         if not found_missing_params:
             print
-        print "\nParameters not in file '" + file_types[i] + "':"
+        print "\nParameters not in file '../" + file_name + file_types[i] + "':"
     for missing_param in missing_param_list:
         print "- " + missing_param
         found_missing_params = True
