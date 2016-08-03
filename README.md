@@ -2,10 +2,10 @@
 
 This repository contains several scripts as well as binaries for code refactoring according to ros coding guidelines. The scripts and their corresponding functionality are listed below:
 
-1) **[cpp_format](#1-cpp_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/CppStyleGuide)  
-2) **[py_format](#2-py_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/PyStyleGuide)  
-3) **[file_format.py](#3-file_formatpy)**: The script called by cpp_format and py_format  
-3) **[param_update.py](#4-param_updatepy)**: Updates ros-parameter names and values automatically as well as manually  
+1. **[cpp_format](#1-cpp_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/CppStyleGuide)  
+2. **[py_format](#2-py_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/PyStyleGuide)  
+3. **[file_format.py](#3-file_formatpy)**: The script called by cpp_format and py_format  
+4. **[param_update.py](#4-param_updatepy)**: Updates ros-parameter names and values automatically as well as manually  
 
 #### Important:
 Please use an extra pull request for any changes made to a repository using these scripts. There will be a lot of automatically driven changes which can be erroneous sometimes. As a conclusion, pull requests containing changes made by these scripts should be reviewed carefully.
@@ -21,11 +21,11 @@ repository. This includes e.g. indents, braces, comments, maximum line length, e
 
 ### How to use it
 
-1)  Call 'rosrun ipa_code_refactoring cpp_format' to run the script without using any parameters.  
-2)  Follow the given instructions to either  
-        (1) format the whole src folder  
-        (2) format all files within the chosen ROS packages  
-        (3) format all files within the chosen repositories (inside 'src' folder)
+1. Call 'rosrun ipa_code_refactoring cpp_format' to run the script without using any parameters.  
+2. Follow the given instructions to either  
+  1. format the whole src folder  
+  2. format all files within the chosen ROS packages  
+  3. format all files within the chosen repositories (inside 'src' folder)
 
 
 ### How to configure it
@@ -54,11 +54,11 @@ repository. Further it installs/upgrades the versions of 'pycodestyle' (python c
 
 How to use it
 -------------------------------
-1)  Call 'rosrun ipa_code_refactoring py_format' to run the script without using any parameters.  
-2)  Follow the given instructions to either  
-      (1) format the whole src folder  
-      (2) format all files within the chosen ROS packages  
-      (3) format all files within the chosen repositories (inside 'src' folder)
+1. Call 'rosrun ipa_code_refactoring py_format' to run the script without using any parameters.  
+2. Follow the given instructions to either  
+  1. format the whole src folder  
+  2. format all files within the chosen ROS packages  
+  3. format all files within the chosen repositories (inside 'src' folder)
 
 
 
@@ -105,13 +105,13 @@ on screen or saved to a file.
 
 ### How to use it
 
-1)  Call 'rosrun ipa_code_refactoring param_update' with up to two parameters.  
-      1. The package name  
-      2. The name of the node within the package (optional)  
-2)  Follow the given instructions to  
-      (1) update parameter names and values  
-      (2) print or save missing parameters to file  
-      (3) open all edited files in sublime
+1. Call 'rosrun ipa_code_refactoring param_update' with up to two parameters.  
+  1. The package name  
+  2. The name of the node within the package (optional)  
+2. Follow the given instructions to  
+  1. update parameter names and values  
+  2. print or save missing parameters to file  
+  3. open all edited files in sublime
 
 
 
