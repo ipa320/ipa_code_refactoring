@@ -206,7 +206,7 @@ def find_file(in_root_path, in_file_name):
     if len(matches) == 1:
         return matches[0]
     else:
-        print "Can't find file with type '" + in_file_name + "'"
+        print "Can't find file with name '" + in_file_name + "'"
         return ''
 
 
@@ -267,19 +267,9 @@ readline.set_completer_delims(' \t\n;')
 readline.set_completer(autocomplete.complete)
 readline.parse_and_bind('tab: complete')
 
-# check if additional filename was provided,
-# otherwise take the package name as filename
+# get package and file name
 print "\n1)  Specify the name of the ROS package for parameter updates:"
 input_ros_pkg = raw_input("ROS Package:  ")
-
-print "\n1)  Specify the name of the node if it differs from the ROS package name (optional):"
-input_node_name = raw_input("Node name:  ")
-
-if len(input_node_name) > 0:
-    file_name = input_node_name
-else:
-    file_name = input_ros_pkg
-
 
 # find path to ros package
 try:
@@ -287,6 +277,18 @@ try:
 except Exception, e:
     print "Can't find ROS Package with name '" + input_ros_pkg + "'"
     sys.exit()
+
+print "\n2)  Specify the name of the node if it differs from the ROS package name (optional):"
+input_node_name = raw_input("Node name:  ")
+print 
+
+if len(input_node_name) > 0:
+    file_name = input_node_name
+else:
+    file_name = input_ros_pkg
+
+
+
 
 # find cpp, cfg and yaml files in pkg_path
 file_paths = ['', '', '', '']
@@ -315,10 +317,12 @@ zip_names = zip(old_names, new_names)
 regex_start = re.compile(r'^class.*_config$')
 # regex for end of variable/parameter declarations
 regex_end = re.compile(r'^};$')
-# regex for finding parameters in common file
+# regex for finding camel-case parameters in common file
 regex_params_common_camel = re.compile(r'[ |,]([a-zA-Z0-9]+)[,|;]')
-# regex for finding parameters in common file
+# regex for finding snake-case parameters in common file
 regex_params_common_snake = re.compile(r'^[ ]*[a-zA-Z:]+ ([a-zA-Z_0-9]+[a-zA-Z0-9]+);')
+# regex for finding any parameters in common file
+regex_params_common = re.compile(r'[a-zA-Z:]+ ([^; ]+);')
 # regex for finding parameters in ros.cpp file
 regex_params_ros = re.compile(r'.param\("([a-zA-Z_0-9]+[a-z0-9]+)"')
 # regex for finding parameters in .cfg file
@@ -338,77 +342,13 @@ regex_values_cfg = re.compile(
 regex_values_yaml = re.compile(r'^([a-z_A-Z0-9]+): ?()([0-9.]+|[a-zA-Z]+|"[^"\']*")')
 
 regex_values = [regex_values_common, regex_values_ros, regex_values_cfg, regex_values_yaml]
-regex_params = [regex_params_common_snake, regex_params_ros, regex_params_cfg, regex_params_yaml]
+regex_params = [regex_params_common, regex_params_ros, regex_params_cfg, regex_params_yaml]
 
-
-# Extract parameters out of common - this serves as initial start point
-print
-if os.path.exists(file_paths[FILE_COMMON]):
-    with open(file_paths[FILE_COMMON], 'r+') as f:
-
-        config_reached = False
-
-        # Read File
-        old = f.readlines()  # Pull the file contents to a list
-        f.seek(0)  # Jump to start, so we overwrite instead of appending
-        for line in old:
-
-            # Find start config section
-            if regex_start.search(line) is not None:
-                config_reached = True
-
-            # Find end config section
-            if (regex_end.search(line) is not None) and (config_reached):
-                config_reached = False
-
-                # zip all names into list of tuples
-                zip_names = zip(old_names, new_names)
-
-                # Sort tuple list by length of new names descending,
-                # so that variables containing others are changed before them
-                zip_names = sorted(zip_names, key=itemgetter(1), reverse=True)
-
-                print_params(zip_names)
-
-            # Still in Config
-            if config_reached:
-                found_params_common_snake = regex_params_common_snake.findall(line)
-                found_params_common_camel = regex_params_common_camel.findall(line)
-                old_names.extend(found_params_common_camel)
-
-                # Extend new/old names by correct params that were found
-                old_names.extend(found_params_common_snake)
-                new_names.extend(found_params_common_snake)
-
-                # If variables were found
-                if len(found_params_common_camel) > 0:
-                    # Fill new_names with converted variable names
-                    for old_var in found_params_common_camel:
-                        new_var = camel_to_snake_word(old_var)
-                        if new_var != old_var:
-                            new_names.append(camel_to_snake_word(old_var))
-                        else:
-                            old_names = old_names[0:len(old_names) - 1]
-
-        print "Extracted " + str(len(old_names)) + " parameters out of \'../" + file_name + "_common.cpp\' \n\n"
-else:
-    print "\nError: File \'" + file_paths[FILE_COMMON] + "\' does not exist."
-    sys.exit()
-
-
-# Check if Parameters were found
-if len(old_names) < 1 and len(new_names) < 1:
-    print "\nError: No parameters found in file \'" + file_paths[FILE_COMMON] + "\'"
-    sys.exit()
-
-
-# Convert all variables in files common.cpp, ros.cpp, .cfg and .yaml if they exist
-convert_params(file_paths, zip_names)
 
 
 ### Find all parameters and their corresponding values in all files with new names ###
-found_params_all = [Set(new_names), Set([]), Set([]), Set([])]
-found_params_raw = [Set(), Set([]), Set([]), Set([])]
+found_params_all = [Set([]), Set([]), Set([]), Set([])]
+found_params_raw = [Set([]), Set([]), Set([]), Set([])]
 extracted_values = [[], [], [], []]
 print "\n"
 
@@ -418,11 +358,22 @@ for current_file_id, current_file in enumerate(file_paths):
             old = f.readlines()                 # Pull the file contents to a list
             f.seek(0)                           # Jump to start, so we overwrite instead of appending
 
+            config_reached = False
+
             # loop through lines of file
             # add all parameters found to the list of its' corresponding id
             # in found_params
             for line in old:
-                if current_file_id > 0 or any(param_name in line for param_name in new_names):
+                if current_file_id == FILE_COMMON:
+                    # Find start of config section (if exists)
+                    if regex_start.search(line) is not None:
+                        config_reached = True
+
+                    # Find end config section
+                    if (regex_end.search(line) is not None) and (config_reached):
+                        config_reached = False
+
+                if current_file_id > FILE_COMMON or config_reached:
                     params_in_line = regex_params[current_file_id].findall(line)
                     if len(params_in_line) > 0:
                         # Save found raw parameters
@@ -436,15 +387,14 @@ for current_file_id, current_file in enumerate(file_paths):
                         found_param_values = regex_values[current_file_id].findall(line)
                         if len(found_param_values) > 0:
                             extracted_values[current_file_id].append(list(found_param_values[0]))
-                        # Turn around type and name for common
-                        if current_file_id == 0:
-                            extracted_values[current_file_id][-1] = extracted_values[current_file_id][-1][::-1]
-                        extracted_values[
-                            current_file_id][-1][0] = camel_to_snake_word(extracted_values[current_file_id][-1][0])
+                            # Turn around type and name for common
+                            if current_file_id == 0:
+                                extracted_values[current_file_id][-1] = extracted_values[current_file_id][-1][::-1]
+                            # Convert name of parameter
+                            extracted_values[
+                                current_file_id][-1][0] = camel_to_snake_word(extracted_values[current_file_id][-1][0])
 
             print "Found " + str(len(found_params_all[current_file_id])) + " parameters in file \'../" + file_name + file_types[current_file_id] + "\'"
-    else:
-        print "\nError: File \'" + current_file + "\' does not exist."
 
 
 # Update parameters that were not found in common
@@ -456,51 +406,22 @@ new_names = []
 for current_file_id, found_params_file in enumerate(found_params_all):
     found_params_raw[current_file_id] -= found_params_file
     for raw_param in found_params_raw[current_file_id]:
-        old_names.append(raw_param)
-        new_names.append(camel_to_snake_word(raw_param))
+        if raw_param not in old_names:
+            old_names.append(raw_param)
+            new_names.append(camel_to_snake_word(raw_param))
 
 zip_names = zip(old_names, new_names)
 
-
 if len(old_names) > 0 and len(new_names) > 0:
-    print '\n\nWrong parameter names have been found, converting files again.\n'
+    print '\n\nWrong parameter names have been found, converting files now.\n'
+    print_params(zip_names)
     # Convert all variables in files common.cpp, ros.cpp, .cfg and .yaml if they exist
     convert_params(file_paths, zip_names)
-
-
-# Find missing params by comparing all lists of found parameters
-list_a_id = 0
-missing_params = [Set([]), Set([]), Set([]), Set([])]
-print '\n'
-
-for list_a in found_params_all[:2]:
-    if len(list_a) <= 0:
-        continue
-    list_b_id = list_a_id + 1
-
-    for list_b in found_params_all[list_b_id:]:
-        # Find differences of lists
-        diff_a = list_a - list_b
-        diff_b = list_b - list_a
-
-        missing_params[list_b_id].update(diff_a)
-        missing_params[list_a_id].update(diff_b)
-
-        list_b_id += 1
-    list_a_id += 1
-
-
-# Print missing parameters
-found_missing_params = False
-for i, missing_param_list in enumerate(missing_params):
-    print "\nParameters not in file '" + file_types[i] + "':\n"
-    for missing_param in missing_param_list:
-        print "- " + missing_param
-        found_missing_params = True
+else:
+    print '\n\nNo parameters with wrong names were found, none will be converted.\n'
 
 
 # Merge all values in one list
-print "\n"
 set_of_values = Set()
 extracted_values_all = []
 iteration_order = [2, 1, 3, 0]  # -> cfg -> ros.cpp -> yaml -> common
@@ -529,7 +450,7 @@ extracted_values = extracted_values_all
 # Change param names/values manually
 old_names = []
 new_names = []
-print "\nDo you want to change parameter names? [y/n]\n"
+print "\nDo you want to change the parameter names/values? [y/n]\n"
 
 user_input = raw_input("Choice: ")
 
@@ -588,13 +509,44 @@ for current_file_id, current_file in enumerate(file_paths[1:3]):
             os.system('chmod ' + old_file_mode + ' ' + current_file)
 
             print "Updated values for " + str(updates) + " parameter occurrences in file \'../" + file_name + file_types[current_file_id + 1] + "\'"
-    else:
-        print "\nError: File \'" + current_file + "\' does not exist."
+
+
+# Find missing params by comparing all lists of found parameters
+list_a_id = 0
+missing_params = [Set([]), Set([]), Set([]), Set([])]
+
+for list_a in found_params_all[:2]:
+    if len(list_a) <= 0:
+        continue
+    list_b_id = list_a_id + 1
+
+    for list_b in found_params_all[list_b_id:]:
+        # Find differences of lists
+        diff_a = list_a - list_b
+        diff_b = list_b - list_a
+
+        missing_params[list_b_id].update(diff_a)
+        missing_params[list_a_id].update(diff_b)
+
+        list_b_id += 1
+    list_a_id += 1
+
+
+# Print missing parameters
+found_missing_params = False
+for i, missing_param_list in enumerate(missing_params):
+    if len(missing_param_list) > 0:
+        if not found_missing_params:
+            print
+        print "\nParameters not in file '" + file_types[i] + "':"
+    for missing_param in missing_param_list:
+        print "- " + missing_param
+        found_missing_params = True
 
 
 # Get missing parameter lines for adding
 if found_missing_params:
-    print "\n[1]        Print lines of all missing values on screen"
+    print "\n\n[1]        Print lines of all missing values on screen"
     print "[2]        Save lines of all missing values to file ('" + file_name + ".missing')"
     print "[Any key]  Print nothing\n"
 
@@ -614,9 +566,9 @@ if found_missing_params:
 
         # Construct lines for specific files
         for current_file_id, current_file in enumerate(missing_params):
-            if user_input == 1:
+            if user_input == 1 and len(current_file) > 0:
                 print "\n\nMissing parameters (values) for file: \'" + file_types[current_file_id] + "\':\n"
-            elif user_input == 2:
+            elif user_input == 2 and len(current_file) > 0:
                 file.write("Missing parameters (values) for file: \'" + file_types[current_file_id] + "\':\n\n")
             for param in sorted(current_file):
                 # Find param in value list

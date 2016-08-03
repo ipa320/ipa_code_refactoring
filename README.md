@@ -18,7 +18,6 @@ Please use an extra pull request for any changes made to a repository using thes
 Auto-formatting all cpp-files found in either the src-directory, a ros package or a whole 
 repository. This includes e.g. indents, braces, comments, maximum line length, etc.
 
-
 ### How to use it
 
 1. Call 'rosrun ipa_code_refactoring cpp_format' to run the script without using any parameters.  
@@ -26,7 +25,6 @@ repository. This includes e.g. indents, braces, comments, maximum line length, e
   1. format the whole src folder  
   2. format all files within the chosen ROS packages  
   3. format all files within the chosen repositories (inside 'src' folder)
-
 
 ### How to configure it
 
@@ -40,8 +38,6 @@ You further you need to specify the paths to your ros workspaces at the beginnin
 'file-format' file.
 
 
-
-
 ## 2. py_format
 ---
 ### Functionality
@@ -50,20 +46,16 @@ Auto-formatting all python-files found in either the src-directory, a ros packag
 repository. Further it installs/upgrades the versions of 'pycodestyle' (python code checker) and
 'autopep8' (python auto code formatter). These two are needed to auto-format the code.
 
+### How to use it
 
-
-How to use it
--------------------------------
 1. Call 'rosrun ipa_code_refactoring py_format' to run the script without using any parameters.  
 2. Follow the given instructions to either  
   1. format the whole src folder  
   2. format all files within the chosen ROS packages  
   3. format all files within the chosen repositories (inside 'src' folder)
 
+### How to configure it
 
-
-How to configure it
--------------------------------
 The python functionality is not yet implemented but the specification of the autopep Options can 
 be found under the following link:
   
@@ -76,16 +68,11 @@ https://pypi.python.org/pypi/autopep8
 Offers the possibilty to execute a code formatting script/binary on all finds found for a certain file 
 extension.
 
-
-
 ### How to use it
 
 This is just the script that is executed by 'cpp-format' as well as 'py-format' scripts.
 It gets a parameter specifying which files are supposed to be formatted. It distingueshes 
 between 'cpp' and 'py'. Further refactoring scripts could be included in the same way.
-
-
-
 
 
 ## 4. param_update.py
@@ -101,26 +88,21 @@ The script allows to also manually modify all found parameters and their regardi
 In the end it is possible to choose whether the parameters missing in some files are printed out
 on screen or saved to a file. 
 
-
-
 ### How to use it
 
-1. Call 'rosrun ipa_code_refactoring param_update' with up to two parameters.  
-  1. The package name  
-  2. The name of the node within the package (optional)  
+1. Call 'rosrun ipa_code_refactoring param_update' without any parameters
 2. Follow the given instructions to  
-  1. update parameter names and values  
-  2. print or save missing parameters to file  
-  3. open all edited files in sublime
-
-
+  1. specify the ros pkg name and optionally a different file name
+  2. update parameter names and values  
+  3. print or save missing parameters to file  
+  4. open all edited files in sublime
 
 ### How to configure it
 
 The configuration is loaded from the file 'cfg/param_update.yaml' and is currently only suitable for the bride structure as given in the *ipa_navigation_localization* package. The script expects the following naming conventions for the different files:
 
 - in package 'x'
-  - common-file: 'n'_common.cpp
+  - common-file: 'n'_common.cpp / 'n'.cpp
   - ros-file: 'n'_ros.cpp
   - cfg-file: 'n'.cfg
 
