@@ -1,14 +1,18 @@
 # IPA Code Refactoring
 
-This repository contains several scripts as well as binaries for code refactoring according to ros coding guidelines. The scripts and their corresponding functionality are listed below:
+This repository contains several scripts as well as binaries for code refactoring according to ros 
+coding guidelines. The scripts and their corresponding functionalities are listed below:
 
 1. **[cpp_format](#1-cpp_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/CppStyleGuide)  
 2. **[py_format](#2-py_format)**: Format h/hpp/cpp files according to ros-cpp coding guidelines (http://wiki.ros.org/PyStyleGuide)  
 3. **[file_format.py](#3-file_formatpy)**: The script called by cpp_format and py_format  
-4. **[param_update.py](#4-param_updatepy)**: Updates ros-parameter names and values automatically as well as manually  
+4. **[clang_format](#4-clang_format)**: The binary called by file_format.py for cpp-files  
+5. **[param_update.py](#5-param_updatepy)**: Updates ros-parameter names and values automatically as well as manually  
 
 #### Important:
-Please use an extra pull request for any changes made to a repository using these scripts. There will be a lot of automatically driven changes which can be erroneous sometimes. As a conclusion, pull requests containing changes made by these scripts should be reviewed carefully.
+Please use an extra pull request for any changes made to a repository using these scripts. There will 
+be a lot of automatically driven changes which can be erroneous sometimes. As a conclusion, pull requests 
+containing changes made by these scripts should be reviewed carefully.
 
 
 ## 1. cpp_format
@@ -28,7 +32,10 @@ repository. This includes e.g. indents, braces, comments, maximum line length, e
 
 ### How to configure it
 
-The formatting properties are specified within the '.clang-format' file in the YAML language.
+The formatting properties are specified within the '.clang-format' file in the YAML language. At the
+beginning of each call, this fill will be copied to the current users home directory. The script than 
+expects all *src*-folders to be below this home folder. Otherwise the configurations specified in the 
+'.clang-format' file won't be applied.
 The specification of the Clang-Format Style Options can be found under the following link:
   
 http://clang.llvm.org/docs/ClangFormatStyleOptions.html
@@ -79,6 +86,20 @@ between 'cpp' and 'py'. Further refactoring scripts could be included in the sam
 ---
 ### Functionality
 
+This binary is called by the file_format.py for formatting cpp-files. You can also call it directly to 
+format a single file.
+
+
+### How to use it
+
+1. Call 'rosrun ipa_code_refactoring clang_format -i -style=file' followed by a file path to format a single file
+
+
+
+## 5. param_update.py
+---
+### Functionality
+
 This script is able to compare all parameter initializations in the _common.cpp, _ros.cpp, .cfg 
 and .yaml file of a package regarding a consistent naming (snake_case) and identical values, if 
 existing. It updates all parameter names according to the occurrences found in the _common.cpp file.
@@ -99,7 +120,9 @@ on screen or saved to a file.
 
 ### How to configure it
 
-The configuration is loaded from the file 'cfg/param_update.yaml' and is currently only suitable for the bride structure as given in the *ipa_navigation_localization* package. The script expects the following naming conventions for the different files:
+The configuration is loaded from the file 'cfg/param_update.yaml' and is currently only suitable for the bride 
+structure as given in the *ipa_navigation_localization* package. The script expects the following naming conventions 
+for the different files:
 
 - in package 'x'
   - common-file: 'n'_common.cpp / 'n'.cpp

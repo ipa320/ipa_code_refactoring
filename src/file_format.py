@@ -14,9 +14,11 @@ import readline
 import glob
 from autocomplete import AutoComplete
 
+
 # Function for user input completion of the current path
 def complete_path(text, state):
     return (glob.glob(text + '*') + [None])[state]
+
 
 
 # Important global variables
@@ -40,12 +42,14 @@ readline.set_completer(complete_path)
 readline.parse_and_bind('tab: complete')
 
 
-exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs rosrun ipa_code_refactoring clang-format -i -style=file',            # CPP
+exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs rosrun ipa_code_refactoring clang_format -i -style=file',            # CPP
                'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}                                            # Python
 
-if len(sys.argv) <= 1:
+if len(sys.argv) < 2:
     print 'You need to provide a file type. Program shutting down now.'
     sys.exit()
+elif len(sys.argv) > 2:
+    os.system('cp ' + this_pkg_path + '/cfg/.clang-format ' + sys.argv[2])
 
 file_type = sys.argv[1]
 
