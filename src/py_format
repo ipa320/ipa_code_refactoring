@@ -12,4 +12,4 @@ echo
 echo "This is an auto-formatting script for .py files."
 echo
 
-./file-format 'py'
+rosrun ipa_code_refactoring file_format.py 'py'

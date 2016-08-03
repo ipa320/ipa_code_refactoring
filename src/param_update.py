@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+from autocomplete import AutoComplete
 from operator import itemgetter
 from sets import Set
 import re
@@ -10,6 +11,7 @@ import subprocess
 import rospkg
 import fnmatch
 import yaml
+import readline
 
 
 def print_params(input_list):
@@ -233,7 +235,6 @@ except Exception, e:
 
 # read config-yaml file
 this_cfg = {}
-print this_cfg_path
 if os.path.exists(this_cfg_path):
     with open(this_cfg_path, 'r') as stream:
         try:
@@ -255,28 +256,36 @@ cfg_yaml_path = this_cfg.get('path_yaml_folder',
 
 editor = this_cfg.get('editor', 'subl')
 
-# check if additional filename was provided,
-# otherwise take the package name as filename
-if len(sys.argv) <= 1:
-    print 'You need to provide at least a package name. Program shutting down now.'
+# add autocompletion of ros packages
+try:
+    autocomplete = AutoComplete(rospack.list())
+except Exception, e:
+    print "Unable to get ROS Package List."
     sys.exit()
 
-pkg_name = sys.argv[1]
-if len(sys.argv) > 2:
-    file_name = sys.argv[2]
-else:
-    file_name = pkg_name
+readline.set_completer_delims(' \t\n;')
+readline.set_completer(autocomplete.complete)
+readline.parse_and_bind('tab: complete')
 
-old_names = []
-new_names = []
-zip_names = zip(old_names, new_names)
+# check if additional filename was provided,
+# otherwise take the package name as filename
+print "\n1)  Specify the name of the ROS package for parameter updates:"
+input_ros_pkg = raw_input("ROS Package:  ")
+
+print "\n1)  Specify the name of the node if it differs from the ROS package name (optional):"
+input_node_name = raw_input("Node name:  ")
+
+if len(input_node_name) > 0:
+    file_name = input_node_name
+else:
+    file_name = input_ros_pkg
 
 
 # find path to ros package
 try:
-    pkg_path = rospack.get_path(pkg_name)
+    pkg_path = rospack.get_path(input_ros_pkg)
 except Exception, e:
-    print "Can't find ROS Package with name '" + pkg_name + "'"
+    print "Can't find ROS Package with name '" + input_ros_pkg + "'"
     sys.exit()
 
 # find cpp, cfg and yaml files in pkg_path
@@ -295,6 +304,9 @@ update_params = [update_params_ros, update_params_cfg]
 # list of methods for constructing lines for missing parameters
 extract_values = [extract_values_common, extract_values_ros, extract_values_cfg, extract_values_yaml]
 
+old_names = []
+new_names = []
+zip_names = zip(old_names, new_names)
 
 ### Regular Expressions ###
 

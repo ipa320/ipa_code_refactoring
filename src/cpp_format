@@ -4,4 +4,4 @@ echo
 echo "This is an auto-formatting script for .h/.cpp files."
 echo
 
-./file-format 'cpp'
+rosrun ipa_code_refactoring file_format.py 'cpp'
