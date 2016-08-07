@@ -1,11 +1,13 @@
-# File types
+# File types/extensions
 file_common: "_common.cpp"
 file_ros: "_ros.cpp"
 file_cfg: ".cfg"
 file_yaml: ".yaml"
 
-# Path to yaml folder
-path_yaml_folder: "/home/srd-rd/catkin_ws/src/ipa_navigation/ipa_navigation_config/config/components"
+# Package that contains the yaml folder
+path_yaml_pkg: "ipa_navigation_config"
+# Path to the yaml folder within the package 
+path_yaml_folder: "config/components"
 
 # Default editor to open files in (command line name of executable)
-editor: "subl"    # sublime
+editor: "nano"    # sublime

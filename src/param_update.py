@@ -244,15 +244,22 @@ if os.path.exists(this_cfg_path):
 else:
     print "Can't find CFG file with name '" + this_cfg_path + '' + "' in package '" + THIS_PKG_NAME + "'"
 
-# File types
+# file types
 file_types = [this_cfg.get('file_common', '_common.cpp'),
               this_cfg.get('file_ros', '_ros.cpp'),
               this_cfg.get('file_cfg', '.cfg'),
               this_cfg.get('file_yaml', '.yaml')]
 
-# Path to yaml folder
-cfg_yaml_path = this_cfg.get('path_yaml_folder',
-                             '/home/srd-rd/catkin_ws/src/ipa_navigation/ipa_navigation_config/config/components')
+## Path to yaml folder
+# check for yaml path pkg
+cfg_yaml_pkg = this_cfg.get('path_yaml_pkg',
+                             'wrong')
+try:
+    cfg_yaml_pkg = rospack.get_path(cfg_yaml_pkg) + '/'
+except Exception, e:
+    print "Can't find ROS Package with name '" + cfg_yaml_pkg + "'"
+    sys.exit()
+cfg_yaml_path = cfg_yaml_pkg + this_cfg.get('path_yaml_folder', 'config/components')
 
 editor = this_cfg.get('editor', 'subl')
 
