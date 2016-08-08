@@ -153,18 +153,17 @@ def convert_params(file_paths, in_zip_names):
         if os.path.exists(current_file):
             with open(current_file) as in_file, open(current_file + '.tmp', 'w') as out_file:
 
-                # old = f.readlines()                 # Pull the file contents to a list
-                # f.seek(0)                           # Jump to start, so we overwrite instead of appending
-
                 # loop through lines of file
                 for line in in_file:
                     for old_var, new_var in in_zip_names:
                         old_camel_var = re.sub('_([a-z0-9])', to_upper, old_var)
-                        if old_var in line and old_var != new_var:
+                        if re.search(r'[^a-zA-Z_0-9]'+old_var+r'[^a-zA-Z_0-9]', line) is not None and old_var is not new_var:
+                        # if old_var in line and old_var != new_var:
                             # if line contains an old variable name -> replace it
                             line = line.replace(old_var, new_var)
                             occurrences += 1
-                        elif old_camel_var in line:
+                        if re.search(r'[^a-zA-Z_0-9]'+old_camel_var+r'[^a-zA-Z_0-9]', line) is not None:
+                        # elif old_camel_var in line:
                             # if line contains an old camel case variable name -> replace it
                             line = line.replace(old_camel_var, new_var)
                             occurrences += 1
