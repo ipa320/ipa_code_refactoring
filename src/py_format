@@ -1,0 +1,15 @@
+#!/bin/bash
+
+echo "Installing/Upgrading python auto-formatting tools."
+echo
+
+# Install/Upgrade python code style checker
+sudo pip install --upgrade pycodestyle
+# Install/Upgrade python automated code refactoring tool 
+sudo pip install --upgrade autopep8
+
+echo
+echo "This is an auto-formatting script for .py files."
+echo
+
+rosrun ipa_code_refactoring file_format.py 'py'

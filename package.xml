@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <name>ipa_code_refactoring</name>
+  <version>0.0.0</version>
+  <description>The ipa_code_refactoring package</description>
+
+  <author email="robin.dietrich@ipa.fraunhofer.de">ipa-srd-rd</author>
+  <maintainer email="jannik.abbenseth@ipa.fraunhofer.de">ipa-jba</maintainer>
+
+  <license>Fraunhofer IPA</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <export>
+  </export>
+</package>
