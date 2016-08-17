@@ -42,7 +42,7 @@ readline.set_completer(complete_path)
 readline.parse_and_bind('tab: complete')
 
 
-exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs rosrun ipa_code_refactoring clang_format -i -style=file',            # CPP
+exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs clang-format-3.8 -i -style=file',            # CPP
                'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}                                            # Python
 
 if len(sys.argv) < 2:
