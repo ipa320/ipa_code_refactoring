@@ -20,7 +20,6 @@ def complete_path(text, state):
     return (glob.glob(text + '*') + [None])[state]
 
 
-
 # Important global variables
 rospack = rospkg.RosPack()
 
@@ -41,8 +40,12 @@ readline.set_completer_delims(' \t\n;')
 readline.set_completer(complete_path)
 readline.parse_and_bind('tab: complete')
 
+print
+print "Supply the executable for your clang formater:"
 
-exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs clang-format-3.8 -i -style=file',            # CPP
+user_input = raw_input("[clang-format-3.8]:  ")
+clang = user_input if user_input != "" else "clang-format-3.8"
+exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs ' + clang + ' -i -style=file',            # CPP
                'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}                                            # Python
 
 if len(sys.argv) < 2:
