@@ -5,7 +5,7 @@ echo
 
 # Install/Upgrade python code style checker
 sudo pip install --upgrade pycodestyle
-# Install/Upgrade python automated code refactoring tool 
+# Install/Upgrade python automated code refactoring tool
 sudo pip install --upgrade autopep8
 
 echo
