@@ -1,4 +1,19 @@
 #!/usr/bin/env python
+#
+# Copyright (c) 2016-2017 Fraunhofer Institute for Manufacturing Engineering and Automation (IPA)
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU Lesser General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 from operator import itemgetter
 from sets import Set
@@ -25,7 +40,7 @@ rospack = rospkg.RosPack()
 
 try:
     this_pkg_path = rospack.get_path('ipa_code_refactoring')
-except Exception, e:
+except Exception as e:
     print "Unable to find ROS Package with name 'ipa_code_refactoring'."
     sys.exit()
 
@@ -45,8 +60,8 @@ print "Supply the executable for your clang formater:"
 
 user_input = raw_input("[clang-format-3.8]:  ")
 clang = user_input if user_input != "" else "clang-format-3.8"
-exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs ' + clang + ' -i -style=file',            # CPP
-               'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}                                            # Python
+exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs ' + clang + ' -i -style=file',  # CPP
+               'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}       # Python
 
 if len(sys.argv) < 2:
     print 'You need to provide a file type. Program shutting down now.'

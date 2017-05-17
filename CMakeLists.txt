@@ -3,5 +3,4 @@ project(ipa_code_refactoring)
 
 find_package(catkin REQUIRED)
 
-catkin_package(
-)
+catkin_package()
