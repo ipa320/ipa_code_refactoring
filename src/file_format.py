@@ -35,6 +35,15 @@ def complete_path(text, state):
     return (glob.glob(text + '*') + [None])[state]
 
 
+def find_clang_format():
+    versions = ('4.0', '3.9', '3.8')
+    for v in versions:
+        candidate = 'clang-format-' + v
+        if os.system('which ' + candidate + ' > /dev/null') == 0:
+            return candidate
+    return ''  # nothing found
+
+
 # Important global variables
 rospack = rospkg.RosPack()
 
@@ -55,11 +64,16 @@ readline.set_completer_delims(' \t\n;')
 readline.set_completer(complete_path)
 readline.parse_and_bind('tab: complete')
 
-print
-print "Supply the executable for your clang formater:"
+clang = find_clang_format()
+if clang != "":
+    print 'Found ' + clang
+else:
+    print
+    print "Supply the executable for your clang formater:"
 
-user_input = raw_input("[clang-format-3.8]:  ")
-clang = user_input if user_input != "" else "clang-format-3.8"
+    user_input = raw_input("[clang-format-3.8]:  ")
+    clang = user_input if user_input != "" else "clang-format-3.8"
+
 exec_policy = {'cpp': ' -name "*.h" -or -name "*.hpp" -or -name "*.cpp" | xargs ' + clang + ' -i -style=file',  # CPP
                'py': ' -name "*.py" | xargs autopep8 --global-config ' + this_pkg_path + '/cfg/pep8.cfg'}       # Python
 
