@@ -86,9 +86,10 @@ if user_input in ['a', 'A']:
 elif user_input in ['b', 'B']:
     readline.set_completer(autocomplete.complete)
     print "\n2)  Specify the ROS packages you want to format (quit by entering [q/Q]):"
-    input_ros_pkg = raw_input("ROS Package:  ")
+    input_ros_pkg = ""
 
     while input_ros_pkg not in ['q', 'Q']:
+        input_ros_pkg = raw_input("ROS Package:  ")
         # try to find ros package by name
         try:
             ros_pkg_path = rospack.get_path(input_ros_pkg)
