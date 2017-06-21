@@ -86,15 +86,15 @@ if user_input in ['a', 'A']:
 elif user_input in ['b', 'B']:
     readline.set_completer(autocomplete.complete)
     print "\n2)  Specify the ROS packages you want to format (quit by entering [q/Q]):"
-    input_ros_pkg = ""
+    input_ros_pkg = raw_input("ROS Package:  ")
 
     while input_ros_pkg not in ['q', 'Q']:
-        input_ros_pkg = raw_input("ROS Package:  ")
         # try to find ros package by name
         try:
             ros_pkg_path = rospack.get_path(input_ros_pkg)
         except Exception, e:
             print "Can't find ROS Package with name '" + input_ros_pkg + "', please try another one."
+            input_ros_pkg = raw_input("ROS Package:  ")
             continue
 
         # format all files according to the selected file type
