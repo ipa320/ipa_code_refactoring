@@ -108,6 +108,7 @@ elif user_input in ['b', 'B']:
             ros_pkg_path = rospack.get_path(input_ros_pkg)
         except Exception, e:
             print "Can't find ROS Package with name '" + input_ros_pkg + "', please try another one."
+            input_ros_pkg = raw_input("ROS Package:  ")
             continue
 
         # format all files according to the selected file type
